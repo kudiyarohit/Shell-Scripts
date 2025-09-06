@@ -1,32 +1,38 @@
-!#/bin/bash
+#!/bin/bash
 
-#####################
-#
-# Author: Rohit Kudiya
-# Date: 5 September 2025
-# verion: v1
-# This script will report the AWS resource usage
-#####################
+###############################################
+# Author  : Rohit Kudiya
+# Date    : 5 September 2025
+# Version : v1
+# Purpose : Script to report AWS resource usage
+###############################################
 
-set -x # Debug mode
+set -e  # Exit immediately if a command fails
+set -x  # Debug mode (prints commands)
 
-# AWS S3
-# AWS EC2
-# AWS LAMBDA
-# AWS IAM Users
+# Output file
+OUTPUT="aws_resources_report.txt"
+> $OUTPUT  # Clear previous report
 
-# List S3 buckets
-echo "List of S3 buckets"
-aws s3 ls > resources
+echo "======= AWS Resource Report =======" >> $OUTPUT
+echo "Generated on: $(date)" >> $OUTPUT
+echo "===================================" >> $OUTPUT
+
+# List S3 Buckets
+echo -e "\n[S3 Buckets]" >> $OUTPUT
+aws s3 ls >> $OUTPUT
 
 # List EC2 Instances
-echo "List of EC2 instances"
-aws ec2 describe-instances | jq '.Reservations[].Instances[].InstanceId' >> resources
+echo -e "\n[EC2 Instances]" >> $OUTPUT
+aws ec2 describe-instances --query "Reservations[].Instances[].InstanceId" --output text >> $OUTPUT
 
-# List lambda
-echo "List of Lambda functions"
-aws lambda list-functions >> resources
+# List Lambda Functions
+echo -e "\n[Lambda Functions]" >> $OUTPUT
+aws lambda list-functions --query "Functions[].FunctionName" --output text >> $OUTPUT
 
-# List IAM users
-echo "List of IAM users"
-aws iam list-users >> resources
+# List IAM Users
+echo -e "\n[IAM Users]" >> $OUTPUT
+aws iam list-users --query "Users[].UserName" --output text >> $OUTPUT
+
+echo -e "\nAWS Resource Report Generated Successfully!"
+echo "Output saved to: $OUTPUT"
